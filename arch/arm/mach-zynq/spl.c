@@ -65,6 +65,9 @@ u32 spl_boot_device(void)
 		hang();
 	}
 
+	puts("force mmc boot\n");
+	mode = BOOT_DEVICE_MMC1;
+
 	return mode;
 }
 
