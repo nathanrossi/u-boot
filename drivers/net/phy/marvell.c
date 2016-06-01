@@ -414,9 +414,9 @@ static int m88e1145_config(struct phy_device *phydev)
 			MIIM_M88E1145_RGMII_TX_DELAY;
 	phy_write(phydev, MDIO_DEVAD_NONE, MIIM_88E1145_PHY_EXT_CR, reg);
 
-	genphy_config_aneg(phydev);
-
 	phy_reset(phydev);
+
+	genphy_config_aneg(phydev);
 
 	return 0;
 }
@@ -443,9 +443,9 @@ static int m88e1149_config(struct phy_device *phydev)
 	phy_write(phydev, MDIO_DEVAD_NONE, 0x1e, 0x0);
 	phy_write(phydev, MDIO_DEVAD_NONE, 0x1e, 0x100);
 
-	genphy_config_aneg(phydev);
-
 	phy_reset(phydev);
+
+	genphy_config_aneg(phydev);
 
 	return 0;
 }
@@ -476,8 +476,9 @@ static int m88e1310_config(struct phy_device *phydev)
 	/* Ensure to return to page 0 */
 	phy_write(phydev, MDIO_DEVAD_NONE, MIIM_88E1310_PHY_PAGE, 0x0000);
 
-	genphy_config_aneg(phydev);
 	phy_reset(phydev);
+
+	genphy_config_aneg(phydev);
 
 	return 0;
 }
