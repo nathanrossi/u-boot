@@ -65,6 +65,10 @@ u32 spl_boot_device(void)
 		hang();
 	}
 
+	/* force boot to mmc */
+	/*mode = BOOT_DEVICE_MMC1;*/
+	mode = BOOT_DEVICE_RAM;
+
 	return mode;
 }
 

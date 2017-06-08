@@ -1,3 +1,4 @@
+#define DEBUG
 /*
  * (C) Copyright 2016
  * Xilinx, Inc.
@@ -49,6 +50,7 @@ static int spl_ram_load_image(struct spl_image_info *spl_image,
 		spl_load_simple_fit(spl_image, &load, 0, header);
 	} else {
 		debug("Legacy image\n");
+		return -1;
 		/*
 		 * Get the header.  It will point to an address defined by
 		 * handoff which will tell where the image located inside

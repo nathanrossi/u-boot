@@ -37,6 +37,8 @@ int arch_fixup_fdt(void *blob)
 	for (bank = 0; bank < CONFIG_NR_DRAM_BANKS; bank++) {
 		start[bank] = bd->bi_dram[bank].start;
 		size[bank] = bd->bi_dram[bank].size;
+		printf("arch_fixup_fdt: bank[%d] start = %llx\n", bank, start[bank]);
+		printf("arch_fixup_fdt: bank[%d] size = %llx\n", bank, size[bank]);
 #ifdef CONFIG_ARMV7_NONSEC
 		ret = armv7_apply_memory_carveout(&start[bank], &size[bank]);
 		if (ret)
@@ -45,6 +47,7 @@ int arch_fixup_fdt(void *blob)
 	}
 
 #ifdef CONFIG_OF_LIBFDT
+	printf("fdt_fixup_memory_banks -> %d\n", CONFIG_NR_DRAM_BANKS);
 	ret = fdt_fixup_memory_banks(blob, start, size, CONFIG_NR_DRAM_BANKS);
 	if (ret)
 		return ret;

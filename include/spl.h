@@ -28,6 +28,10 @@ struct spl_image_info {
 	u32 size;
 	u32 flags;
 	void *arg;
+#if defined(CONFIG_SPL_LOAD_FIT_RAMDISK)
+	void *initrd_start;
+	void *initrd_end;
+#endif
 };
 
 /*

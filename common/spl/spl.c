@@ -1,3 +1,4 @@
+#define DEBUG
 /*
  * (C) Copyright 2010
  * Texas Instruments, <www.ti.com>
@@ -75,11 +76,13 @@ int __weak bootz_setup(ulong image, ulong *start, ulong *end)
 }
 #endif
 
-void spl_fixup_fdt(void)
+void spl_fixup_fdt(struct spl_image_info *spl_image)
 {
-#if defined(CONFIG_SPL_OF_LIBFDT) && defined(CONFIG_SYS_SPL_ARGS_ADDR)
-	void *fdt_blob = (void *)CONFIG_SYS_SPL_ARGS_ADDR;
+#if defined(CONFIG_SPL_OF_LIBFDT)
+	void *fdt_blob = (void *)(spl_image->arg);
 	int err;
+
+	printf("fdt_blob @ 0x%08x\n", (unsigned long)fdt_blob);
 
 	err = fdt_check_header(fdt_blob);
 	if (err < 0) {
@@ -99,6 +102,18 @@ void spl_fixup_fdt(void)
 		printf("spl: arch_fixup_fdt err - %d\n", err);
 		return;
 	}
+
+#if defined(CONFIG_SPL_OF_LOAD_RAMDISK)
+	if (*initrd_start && *initrd_end) {
+		of_size += FDT_RAMDISK_OVERHEAD;
+		fdt_set_totalsize(blob, of_size);
+	}
+	/* Create a new LMB reservation */
+	/*if (lmb)*/
+		/*lmb_reserve(lmb, (ulong)blob, of_size);*/
+
+	fdt_initrd(blob, *initrd_start, *initrd_end);
+#endif
 #endif
 }
 
@@ -359,10 +374,6 @@ void board_init_r(gd_t *dummy1, ulong dummy2)
 
 	debug(">>spl:board_init_r()\n");
 	gd->bd = &bdata;
-#ifdef CONFIG_SPL_OS_BOOT
-	dram_init_banksize();
-#endif
-
 #if defined(CONFIG_SYS_SPL_MALLOC_START)
 	mem_malloc_init(CONFIG_SYS_SPL_MALLOC_START,
 			CONFIG_SYS_SPL_MALLOC_SIZE);
@@ -372,6 +383,12 @@ void board_init_r(gd_t *dummy1, ulong dummy2)
 		if (spl_init())
 			hang();
 	}
+
+#ifdef CONFIG_SPL_OS_BOOT
+	debug("calling init banksize()\n");
+	dram_init_banksize();
+#endif
+
 #ifndef CONFIG_PPC
 	/*
 	 * timer_init() does not exist on PPC systems. The timer is initialized
@@ -385,6 +402,7 @@ void board_init_r(gd_t *dummy1, ulong dummy2)
 #endif
 
 	memset(&spl_image, '\0', sizeof(spl_image));
+	printf("spl_image @ %08x\n", (unsigned long)&spl_image);
 #ifdef CONFIG_SYS_SPL_ARGS_ADDR
 	spl_image.arg = (void *)CONFIG_SYS_SPL_ARGS_ADDR;
 #endif
@@ -403,7 +421,7 @@ void board_init_r(gd_t *dummy1, ulong dummy2)
 #ifdef CONFIG_SPL_OS_BOOT
 	case IH_OS_LINUX:
 		debug("Jumping to Linux\n");
-		spl_fixup_fdt();
+		spl_fixup_fdt(&spl_image);
 		spl_board_prepare_for_linux();
 		jump_to_image_linux(&spl_image);
 #endif

@@ -294,11 +294,13 @@
 #undef CONFIG_FPGA
 #endif
 
-/* Address in RAM where the parameters must be copied by SPL. */
-#define CONFIG_SYS_SPL_ARGS_ADDR	0x10000000
+#define CONFIG_SPL_LOAD_FIT_ADDRESS	0xf000000
 
-#define CONFIG_SPL_FS_LOAD_ARGS_NAME		"system.dtb"
-#define CONFIG_SPL_FS_LOAD_KERNEL_NAME		"uImage"
+/* Address in RAM where the parameters must be copied by SPL. */
+#define CONFIG_SYS_SPL_ARGS_ADDR	0x1f000000
+
+/*#define CONFIG_SPL_FS_LOAD_ARGS_NAME		"system.dtb"*/
+#define CONFIG_SPL_FS_LOAD_KERNEL_NAME		"fitImage"
 
 /* Not using MMC raw mode - just for compilation purpose */
 #define CONFIG_SYS_MMCSD_RAW_MODE_ARGS_SECTOR	0
@@ -337,8 +339,8 @@
  */
 #define CONFIG_SPL_STACK	0xfffffe00
 
-/* BSS setup */
-#define CONFIG_SPL_BSS_START_ADDR	0x100000
+/* BSS setup, offset at 64M +1M size */
+#define CONFIG_SPL_BSS_START_ADDR	0x4000000
 #define CONFIG_SPL_BSS_MAX_SIZE		0x100000
 
 #define CONFIG_SYS_UBOOT_START	CONFIG_SYS_TEXT_BASE

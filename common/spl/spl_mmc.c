@@ -196,6 +196,7 @@ static int mmc_load_image_raw_os(struct spl_image_info *spl_image,
 	unsigned long count;
 	int ret;
 
+#ifdef CONFIG_SYS_SPL_ARGS_ADDR
 	count = blk_dread(mmc_get_blk_desc(mmc),
 		CONFIG_SYS_MMCSD_RAW_MODE_ARGS_SECTOR,
 		CONFIG_SYS_MMCSD_RAW_MODE_ARGS_SECTORS,
@@ -206,6 +207,7 @@ static int mmc_load_image_raw_os(struct spl_image_info *spl_image,
 #endif
 		return -1;
 	}
+#endif
 
 	ret = mmc_load_image_raw_sector(spl_image, mmc,
 		CONFIG_SYS_MMCSD_RAW_MODE_KERNEL_SECTOR);

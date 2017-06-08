@@ -244,6 +244,11 @@ config SPL_LOAD_FIT
 	  particular it can handle selecting from multiple device tree
 	  and passing the correct one to U-Boot.
 
+config SPL_LOAD_FIT_RAMDISK
+	bool "Enable SPL loading of a RAMDISK from a FIT"
+	help
+	  Enable the loading of a RAMDISK from a FIT.
+
 config SPL_FIT_IMAGE_POST_PROCESS
 	bool "Enable post-processing of FIT artifacts after loading by the SPL"
 	depends on SPL_LOAD_FIT && TI_SECURE_DEVICE

@@ -1,3 +1,4 @@
+#define DEBUG
 /*
  * (C) Copyright 2010-2012
  * Texas Instruments, <www.ti.com>
@@ -54,6 +55,7 @@ void __noreturn jump_to_image_linux(struct spl_image_info *spl_image)
 #endif
 
 	debug("Entering kernel arg pointer: 0x%p\n", spl_image->arg);
+	debug("Entering kernel entry pointer: 0x%p\n", spl_image->entry_point);
 	typedef void (*image_entry_arg_t)(int, int, void *)
 		__attribute__ ((noreturn));
 	image_entry_arg_t image_entry =

@@ -139,6 +139,7 @@ int spl_load_image_fat_os(struct spl_image_info *spl_image,
 defaults:
 #endif
 
+#ifdef CONFIG_SPL_FS_LOAD_ARGS_NAME
 	err = file_fat_read(CONFIG_SPL_FS_LOAD_ARGS_NAME,
 			    (void *)CONFIG_SYS_SPL_ARGS_ADDR, 0);
 	if (err <= 0) {
@@ -148,6 +149,7 @@ defaults:
 #endif
 		return -1;
 	}
+#endif
 
 	return spl_load_image_fat(spl_image, block_dev, partition,
 			CONFIG_SPL_FS_LOAD_KERNEL_NAME);

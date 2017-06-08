@@ -1,3 +1,4 @@
+#define DEBUG
 /*
  * Copyright (C) 2016 Google, Inc
  * Written by Simon Glass <sjg@chromium.org>
@@ -203,11 +204,11 @@ static int spl_load_fit_image(struct spl_load_info *info, ulong sector,
 	overhead = get_aligned_image_overhead(info, offset);
 	nr_sectors = get_aligned_image_size(info, length, offset);
 
+	debug("image: dst=%lx, offset=%lx, size=%lx\n", load_ptr, offset,
+	      (unsigned long)length);
 	if (info->read(info, sector + get_aligned_image_offset(info, offset),
 		       nr_sectors, (void*)load_ptr) != nr_sectors)
 		return -EIO;
-	debug("image: dst=%lx, offset=%lx, size=%lx\n", load_ptr, offset,
-	      (unsigned long)length);
 
 	src = (void *)load_ptr + overhead;
 #ifdef CONFIG_SPL_FIT_IMAGE_POST_PROCESS
@@ -274,6 +275,9 @@ int spl_load_simple_fit(struct spl_image_info *spl_image,
 		return -1;
 	}
 
+	/* default to os being u-boot */
+	spl_image->os = IH_OS_U_BOOT;
+
 	/* find the U-Boot image */
 	node = spl_fit_get_image_node(fit, images, "firmware", 0);
 	if (node < 0) {
@@ -285,6 +289,17 @@ int spl_load_simple_fit(struct spl_image_info *spl_image,
 		 */
 		index = 1;
 	}
+
+#if defined(CONFIG_SPL_OS_BOOT)
+	/* could not find u-boot image, try looking for kernel */
+	if (node < 0) {
+		node = spl_fit_get_image_node(fit, images, "kernel", 0);
+		/* assume OS is Linux if using kernel property */
+		if (node >= 0)
+			spl_image->os = IH_OS_LINUX;
+	}
+#endif
+
 	if (node < 0) {
 		debug("%s: Cannot find u-boot image node: %d\n",
 		      __func__, node);
@@ -297,8 +312,6 @@ int spl_load_simple_fit(struct spl_image_info *spl_image,
 	if (ret)
 		return ret;
 
-	spl_image->os = IH_OS_U_BOOT;
-
 	/* Figure out which device tree the board wants to use */
 	node = spl_fit_get_image_node(fit, images, FIT_FDT_PROP, 0);
 	if (node < 0) {
@@ -310,11 +323,16 @@ int spl_load_simple_fit(struct spl_image_info *spl_image,
 	 * Read the device tree and place it after the image.
 	 * Align the destination address to ARCH_DMA_MINALIGN.
 	 */
-	image_info.load_addr = spl_image->load_addr + spl_image->size;
+	image_info.load_addr = CONFIG_SYS_SPL_ARGS_ADDR;
 	ret = spl_load_fit_image(info, sector, fit, base_offset, node,
 				 &image_info);
-	if (ret < 0)
+	if (ret < 0) {
+		debug("%s: failed to load device tree after image\n", __func__);
 		return ret;
+	}
+
+	/* Setup the spl image args to point at the device tree */
+	spl_image->arg = image_info.load_addr;
 
 	/* Now check if there are more images for us to load */
 	for (; ; index++) {
@@ -343,6 +361,9 @@ int spl_load_simple_fit(struct spl_image_info *spl_image,
 	 */
 	if (spl_image->entry_point == FDT_ERROR || spl_image->entry_point == 0)
 		spl_image->entry_point = spl_image->load_addr;
+
+	debug("%s: spl_image->load_addr = %08x\n", __func__, spl_image->load_addr);
+	debug("%s: spl_image->entry_point = %08x\n", __func__, spl_image->entry_point);
 
 	return 0;
 }
